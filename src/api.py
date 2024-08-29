@@ -32,12 +32,38 @@ def get_training_data():
 
 @app.route("/predict", methods=["GET"])
 def predict():
-    zylinder = request.args.get('zylinder')
-    ps = request.args.get('ps')
-    gewicht = request.args.get('gewicht')
-    beschleunigung = request.args.get('beschleunigung')
-    baujahr = request.args.get('baujahr')
+    try:
+        # Retrieve and convert query parameters to appropriate numeric types
+        zylinder = int(request.args.get('zylinder'))
+        ps = int(request.args.get('ps'))
+        gewicht = float(request.args.get('gewicht'))
+        beschleunigung = float(request.args.get('beschleunigung'))
+        baujahr = int(request.args.get('baujahr'))
 
-    prediction = trained_model.predict([[zylinder, ps, gewicht, beschleunigung, baujahr]])
+        # Make the prediction
+        prediction = trained_model.predict([[zylinder, ps, gewicht, beschleunigung, baujahr]])
 
-    return {"result": prediction[0]}
+        # Return the result as JSON
+        return {
+            "input": {
+                "zylinder": zylinder,
+                "ps": ps,
+                "gewicht": gewicht,
+                "beschleunigung": beschleunigung,
+                "baujahr": baujahr
+            },
+            "result": prediction[0]
+        }
+
+    except ValueError as e:
+        # Handle conversion errors
+        return {"error": str(e)}, 400
+
+    except Exception as e:
+        # Handle any other errors
+        return {"error": "An error occurred: " + str(e)}, 500
+
+
+
+    
+    
